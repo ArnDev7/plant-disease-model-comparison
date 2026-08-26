@@ -1,0 +1,44 @@
+# configs/mlp.yaml
+
+experiment:
+  name: mlp_baseline
+  seed: 42
+
+data:
+  dataset: plantvillage
+  split_csv: data/splits/split.csv
+  img_size: 224
+  num_workers: 0
+
+model:
+  name: mlp
+  num_classes: 15
+  pretrained: false
+  dropout: 0.3
+
+training:
+  batch_size: 64
+  epochs_head: 0             # From scratch: no head-only phase
+  epochs_finetune: 25        # Full network training epochs
+  optimizer: adamw
+  lr_head: 0.001
+  lr_finetune: 0.001         # Standard scratch learning rate
+  weight_decay: 0.0001
+  label_smoothing: 0.0
+  early_stopping_metric: macro_f1
+  early_stopping_patience: 5
+
+scheduler:
+  type: cosine
+  warmup_epochs: 0
+
+freeze:
+  strategy: none             # No freezing for scratch model
+
+logging:
+  output_dir: reports/mlp
+  save_best: true
+  log_every: 1
+
+device:
+  prefer_mps: true

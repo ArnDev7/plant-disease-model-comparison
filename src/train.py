@@ -81,6 +81,7 @@ def make_loaders(cfg: Dict[str, Any]) -> Tuple[DataLoader, DataLoader]:
         shuffle=True,
         num_workers=num_workers,
         pin_memory=False,  # MPS doesn't benefit like CUDA
+        drop_last=True,
     )
 
     val_loader = DataLoader(

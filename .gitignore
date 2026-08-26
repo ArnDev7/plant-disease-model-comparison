@@ -11,7 +11,7 @@ data/raw/
 data/processed/
 
 # Reports & outputs
-
+reports/
 # Model checkpoints
 *.pt
 *.pth

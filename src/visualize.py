@@ -317,10 +317,21 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     root = project_root()
-    out_dir = _ensure_reports_figures()
+
+    cfg = None
+    if args.config and Path(args.config).exists():
+        cfg = _load_config(args.config)
+
+    report_dir_name = cfg.get("logging", {}).get("output_dir", "reports") if cfg else "reports"
+    report_dir = root / report_dir_name
+    out_dir = ensure_dir(report_dir / "figures")
 
     # 1) curves
-    history_path = (root / args.history).resolve() if not Path(args.history).is_absolute() else Path(args.history)
+    if args.history == "reports/history.json" and report_dir_name != "reports":
+        history_path = report_dir / "history.json"
+    else:
+        history_path = (root / args.history).resolve() if not Path(args.history).is_absolute() else Path(args.history)
+
     if history_path.exists():
         p1 = plot_training_curves(history_path, out_dir)
         print(f"Saved: {p1}")
@@ -328,7 +339,11 @@ def main() -> None:
         print(f"Skip curves: history not found at {history_path}")
 
     # 2) confusion matrix
-    cm_path = (root / args.cm).resolve() if not Path(args.cm).is_absolute() else Path(args.cm)
+    if args.cm == "reports/test_confusion_matrix.npy" and report_dir_name != "reports":
+        cm_path = report_dir / "test_confusion_matrix.npy"
+    else:
+        cm_path = (root / args.cm).resolve() if not Path(args.cm).is_absolute() else Path(args.cm)
+
     if cm_path.exists():
         p2 = plot_confusion_matrix(cm_path, out_dir, normalize=args.normalize_cm)
         print(f"Saved: {p2}")
@@ -339,10 +354,10 @@ def main() -> None:
     if args.make_gallery:
         exp_ckpt = args.checkpoint
         if exp_ckpt is None:
-            # default to reports/checkpoints/<experiment>_best.pt
-            cfg = _load_config(args.config)
+            if cfg is None:
+                cfg = _load_config(args.config)
             exp_name = cfg["experiment"]["name"]
-            exp_ckpt = str(root / "reports" / "checkpoints" / f"{exp_name}_best.pt")
+            exp_ckpt = str(report_dir / "checkpoints" / f"{exp_name}_best.pt")
 
         p3 = save_misclassified_gallery(
             config_path=args.config,

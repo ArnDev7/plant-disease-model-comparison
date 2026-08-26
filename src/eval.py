@@ -140,7 +140,8 @@ def main() -> None:
     # Choose checkpoint path
     root = project_root()
     exp_name = cfg["experiment"]["name"]
-    default_ckpt = root / "reports" / "checkpoints" / f"{exp_name}_best.pt"
+    out_dir = root / (cfg.get("logging", {}).get("output_dir", "reports"))
+    default_ckpt = out_dir / "checkpoints" / f"{exp_name}_best.pt"
     ckpt_path = Path(args.checkpoint).expanduser().resolve() if args.checkpoint else default_ckpt
 
     if not ckpt_path.exists():
@@ -178,8 +179,8 @@ def main() -> None:
         f"top3={out['topk_accuracy'] if out['topk_accuracy'] is not None else 'n/a'}"
     )
 
-    # Save artifacts
-    reports_dir = ensure_dir(root / "reports")
+    # Save artifacts in config-specified output dir
+    reports_dir = ensure_dir(out_dir)
     figures_dir = ensure_dir(reports_dir / "figures")
     _ = figures_dir  # reserved for later visualize.py outputs
 

@@ -138,6 +138,16 @@ def build_efficientnet_b0(num_classes: int, pretrained: bool = True, dropout: fl
     return model
 
 
+from src.models.mlp import MLPBaseline
+
+
+def build_mlp(num_classes: int, dropout: float = 0.3) -> nn.Module:
+    """
+    Build an MLP baseline model.
+    """
+    return MLPBaseline(num_classes=num_classes, dropout=dropout)
+
+
 def build_model(name: str, num_classes: int, pretrained: bool = True, dropout: float = 0.0) -> nn.Module:
     """
     Convenience factory.
@@ -145,8 +155,11 @@ def build_model(name: str, num_classes: int, pretrained: bool = True, dropout: f
       - "resnet18"
       - "resnet50"
       - "efficientnet_b0"
+      - "mlp"
     """
     name = name.lower().strip()
+    if name == "mlp":
+        return build_mlp(num_classes=num_classes, dropout=dropout if dropout > 0 else 0.3)
     if name == "resnet18":
         return build_resnet18(num_classes=num_classes, pretrained=pretrained, dropout=dropout)
     if name == "resnet50":
