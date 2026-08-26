@@ -103,8 +103,8 @@ def build_from_config(cfg: Dict[str, Any], num_classes: int) -> nn.Module:
     pretrained = bool(cfg["model"].get("pretrained", True))
     dropout = float(cfg["model"].get("dropout", 0.0))
 
-    if name in {"baseline_cnn", "cnn_baseline"}:
-        return CNNBaseline(num_classes=num_classes, dropout=dropout)
+    if name in {"baseline_cnn", "cnn_baseline", "custom_cnn", "cnn_custom"}:
+        return CNNBaseline(num_classes=num_classes, dropout=dropout if dropout > 0 else 0.3)
 
     # transfer models
     return build_model(name=name, num_classes=num_classes, pretrained=pretrained, dropout=dropout)

@@ -138,6 +138,7 @@ def build_efficientnet_b0(num_classes: int, pretrained: bool = True, dropout: fl
     return model
 
 
+from src.models.cnn_baseline import build_custom_cnn
 from src.models.mlp import MLPBaseline
 
 
@@ -152,12 +153,15 @@ def build_model(name: str, num_classes: int, pretrained: bool = True, dropout: f
     """
     Convenience factory.
     name examples:
+      - "custom_cnn" / "cnn_custom"
       - "resnet18"
       - "resnet50"
       - "efficientnet_b0"
       - "mlp"
     """
     name = name.lower().strip()
+    if name in {"custom_cnn", "cnn_custom", "baseline_cnn", "cnn_baseline"}:
+        return build_custom_cnn(num_classes=num_classes, dropout=dropout if dropout > 0 else 0.3)
     if name == "mlp":
         return build_mlp(num_classes=num_classes, dropout=dropout if dropout > 0 else 0.3)
     if name == "resnet18":
@@ -168,3 +172,4 @@ def build_model(name: str, num_classes: int, pretrained: bool = True, dropout: f
         return build_efficientnet_b0(num_classes=num_classes, pretrained=pretrained, dropout=max(dropout, 0.0))
 
     raise ValueError(f"Unknown model name: {name}")
+

@@ -64,8 +64,8 @@ def build_from_config(cfg: Dict[str, Any], num_classes: int) -> nn.Module:
     pretrained = bool(cfg["model"].get("pretrained", True))
     dropout = float(cfg["model"].get("dropout", 0.0))
 
-    if name in {"baseline_cnn", "cnn_baseline"}:
-        return CNNBaseline(num_classes=num_classes, dropout=dropout)
+    if name in {"baseline_cnn", "cnn_baseline", "custom_cnn", "cnn_custom"}:
+        return CNNBaseline(num_classes=num_classes, dropout=dropout if dropout > 0 else 0.3)
 
     # transfer model
     return build_model(name=name, num_classes=num_classes, pretrained=pretrained, dropout=dropout)
@@ -105,13 +105,15 @@ def default_target_layer_name(model_name: str) -> str:
     Sensible defaults:
       - ResNet*: layer4
       - EfficientNet/MobileNet: features
-      - Baseline CNN: features (we'll define it in CNNBaseline if exists; else try 'backbone')
+      - Baseline CNN / Custom CNN: features.3.block.0 (or features.3)
     """
     mn = model_name.lower()
     if "resnet" in mn:
         return "layer4"
     if "efficientnet" in mn or "mobilenet" in mn:
         return "features"
+    if "cnn" in mn or "custom" in mn:
+        return "features.3.block.0"
     # fallback
     return "layer4"
 

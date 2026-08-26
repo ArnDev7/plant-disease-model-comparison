@@ -71,3 +71,15 @@ class CNNBaseline(nn.Module):
         x = self.gap(x)
         x = self.classifier(x)
         return x
+
+
+# Canonical alias for the Custom CNN baseline
+CustomCNN = CNNBaseline
+
+
+def build_custom_cnn(num_classes: int, dropout: float = 0.3) -> nn.Module:
+    """
+    Build a Custom CNN baseline model.
+    """
+    return CustomCNN(num_classes=num_classes, dropout=dropout)
+
