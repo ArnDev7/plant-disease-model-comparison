@@ -1,0 +1,44 @@
+# configs/vit_b16.yaml
+
+experiment:
+  name: vit_b16
+  seed: 42
+
+data:
+  dataset: plantvillage
+  split_csv: data/splits/split.csv
+  img_size: 224
+  num_workers: 0
+
+model:
+  name: vit_b16
+  num_classes: 15
+  pretrained: true
+  dropout: 0.1
+
+training:
+  batch_size: 8
+  epochs_head: 8             # Phase 1: Train classification head only
+  epochs_finetune: 15        # Phase 2: Fine-tune full Vision Transformer
+  optimizer: adamw
+  lr_head: 0.001             # Higher learning rate for new classification head
+  lr_finetune: 0.00001       # Small learning rate for full ViT fine-tuning
+  weight_decay: 0.0001
+  label_smoothing: 0.0
+  early_stopping_metric: macro_f1
+  early_stopping_patience: 5
+
+scheduler:
+  type: cosine
+  warmup_epochs: 0
+
+freeze:
+  strategy: all              # Phase 1 freezes backbone, Phase 2 unfreezes all parameters
+
+logging:
+  output_dir: reports/vit_b16
+  save_best: true
+  log_every: 1
+
+device:
+  prefer_mps: true

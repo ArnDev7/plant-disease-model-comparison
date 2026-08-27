@@ -21,7 +21,7 @@ def freeze_backbone(model: nn.Module, keep_classifier_trainable: bool = True) ->
 
     if keep_classifier_trainable:
         # Common classifier attribute names across torchvision models
-        for attr in ("fc", "classifier", "head"):
+        for attr in ("fc", "classifier", "head", "heads"):
             if hasattr(model, attr):
                 head = getattr(model, attr)
                 for p in head.parameters():
@@ -138,6 +138,30 @@ def build_efficientnet_b0(num_classes: int, pretrained: bool = True, dropout: fl
     return model
 
 
+def build_vit_b16(num_classes: int, pretrained: bool = True, dropout: float = 0.1) -> nn.Module:
+    """
+    Build a Vision Transformer ViT-B/16 with a classifier head for num_classes.
+    """
+    if pretrained:
+        weights = models.ViT_B_16_Weights.DEFAULT
+        model = models.vit_b_16(weights=weights)
+    else:
+        model = models.vit_b_16(weights=None)
+
+    in_features = 768
+    if hasattr(model, "heads") and hasattr(model.heads, "head") and hasattr(model.heads.head, "in_features"):
+        in_features = model.heads.head.in_features
+    elif hasattr(model, "heads") and isinstance(model.heads, nn.Sequential) and len(model.heads) > 0:
+        if hasattr(model.heads[-1], "in_features"):
+            in_features = model.heads[-1].in_features
+
+    model.heads = nn.Sequential(
+        nn.Dropout(p=dropout),
+        nn.Linear(in_features, num_classes),
+    )
+    return model
+
+
 from src.models.cnn_baseline import build_custom_cnn
 from src.models.mlp import MLPBaseline
 
@@ -153,6 +177,7 @@ def build_model(name: str, num_classes: int, pretrained: bool = True, dropout: f
     """
     Convenience factory.
     name examples:
+      - "vit_b16" / "vit_b_16" / "vit"
       - "custom_cnn" / "cnn_custom"
       - "resnet18"
       - "resnet50"
@@ -160,6 +185,8 @@ def build_model(name: str, num_classes: int, pretrained: bool = True, dropout: f
       - "mlp"
     """
     name = name.lower().strip()
+    if name in {"vit_b16", "vit_b_16", "vit"}:
+        return build_vit_b16(num_classes=num_classes, pretrained=pretrained, dropout=dropout if dropout > 0 else 0.1)
     if name in {"custom_cnn", "cnn_custom", "baseline_cnn", "cnn_baseline"}:
         return build_custom_cnn(num_classes=num_classes, dropout=dropout if dropout > 0 else 0.3)
     if name == "mlp":
@@ -172,4 +199,5 @@ def build_model(name: str, num_classes: int, pretrained: bool = True, dropout: f
         return build_efficientnet_b0(num_classes=num_classes, pretrained=pretrained, dropout=max(dropout, 0.0))
 
     raise ValueError(f"Unknown model name: {name}")
+
 
