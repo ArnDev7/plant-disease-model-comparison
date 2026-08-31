@@ -97,6 +97,24 @@ Based strictly on empirical evaluation outputs in [`reports/comparison/factual_o
 
 ---
 
+## 🖥️ Interactive Demo
+
+The project includes an optional Streamlit frontend for interactive inference demonstrations. This is separate from academic training.
+
+1. Ensure your best ViT-B/16 checkpoint is located at: `reports/vit_b16/checkpoints/vit_b16_best.pt`
+2. Start the application:
+   ```bash
+   .\.venv\Scripts\python.exe -m streamlit run app.py
+   ```
+   *(Alternatively: `streamlit run app.py`)*
+3. Open the local URL displayed in the terminal.
+4. Upload a PNG, JPG, or JPEG leaf image.
+5. View the predicted class and Top-3 confidence scores.
+
+For more details, refer to [docs/FRONTEND.md](docs/FRONTEND.md).
+
+---
+
 ## 📁 Repository Structure
 
 ```text
