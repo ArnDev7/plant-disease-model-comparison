@@ -99,21 +99,25 @@ Based strictly on empirical evaluation outputs in [`reports/comparison/factual_o
 
 ## 🖥️ Interactive Demo
 
-The project includes an optional Streamlit frontend for interactive inference demonstrations. This is separate from academic training. The Streamlit application allows a user to upload a PlantVillage-style leaf image and view:
+The project includes an optional Streamlit frontend for interactive inference demonstrations. The purpose of this frontend is to allow users to upload PlantVillage-style leaf images and visually inspect the model's predictions.
+
+- **Selected Inference Model:** ViT-B/16
+- **Required Checkpoint Location:** `reports/vit_b16/checkpoints/vit_b16_best.pt`
+- **Supported Uploads:** PNG, JPG, and JPEG images
+
+The application interface displays:
 - Predicted class
 - Model confidence score
 - Top-3 predictions
 - Confidence visualization
-- Model and device information
+- Device and Model information
 
-1. Ensure your best ViT-B/16 checkpoint is located at: `reports/vit_b16/checkpoints/vit_b16_best.pt`
-2. Start the application:
-   ```bash
-   .\.venv\Scripts\python.exe -m streamlit run app.py
-   ```
-   *(Alternatively: `streamlit run app.py`)*
-3. Open the local URL displayed in the terminal.
-4. Upload a PNG, JPG, or JPEG leaf image.
+> **Academic Disclaimer:** This is an academic image-classification demonstration, not agricultural or professional diagnostic advice.
+
+To launch the frontend locally, run the following Windows startup command:
+```powershell
+.\.venv\Scripts\python.exe -m streamlit run app.py
+```
 
 For more details, refer to [docs/FRONTEND.md](docs/FRONTEND.md).
 
