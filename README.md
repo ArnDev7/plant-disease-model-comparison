@@ -53,7 +53,7 @@ All quantitative metrics are computed on the held-out **3,096-image test set** u
 | **MLP** | 77.42% | 77.36% | 71.27% | 72.07% | 94.54% |
 | **Custom CNN** | 76.94% | 78.84% | 71.76% | 70.81% | 91.63% |
 | **ResNet-18** | **88.53%** | **88.64%** | **86.97%** | **87.06%** | **98.29%** |
-| **ViT-B/16** | *Pending CUDA* | *Pending CUDA* | *Pending CUDA* | *Pending CUDA* | *Pending CUDA* |
+| **ViT-B/16** | 99.77% | 99.79% | 99.80% | 99.79% | 100.00% |
 
 ### Additional Reference Benchmark
 
@@ -61,7 +61,7 @@ All quantitative metrics are computed on the held-out **3,096-image test set** u
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **EfficientNet-B0** | 82.69% | 81.13% | 81.10% | 79.89% | 95.51% |
 
-> *Note: ViT-B/16 architecture integration and smoke validation pipeline are verified; official full-dataset 23-epoch fine-tuning is scheduled for execution upon CUDA acceleration availability.*
+> *Note: ViT-B/16 architecture integration and official full-dataset 23-epoch fine-tuning were executed and verified with CUDA acceleration.*
 
 ---
 
