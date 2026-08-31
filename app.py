@@ -1,18 +1,13 @@
 import streamlit as st
-import torch
-import json
-from PIL import Image
-import torch.nn.functional as F
-import yaml
 import os
 import sys
 from pathlib import Path
+from PIL import Image
 
 # Add project root to sys.path to allow src imports
 sys.path.append(str(Path(__file__).parent))
 
-from src.train import build_from_config
-from src.data.transforms import build_eval_transforms
+from src.inference import load_inference_model, predict_image, resolve_device
 
 # Configure Streamlit page
 st.set_page_config(
@@ -27,34 +22,12 @@ LABEL_MAP_PATH = "data/splits/label_map.json"
 CONFIG_PATH = "configs/vit_b16.yaml"
 
 @st.cache_resource
-def load_model_and_labels():
-    if not os.path.exists(CHECKPOINT_PATH):
-        raise FileNotFoundError(f"Checkpoint not found at {CHECKPOINT_PATH}. Please ensure the model is trained and the checkpoint is available.")
-    
-    if not os.path.exists(LABEL_MAP_PATH):
-        raise FileNotFoundError(f"Label map not found at {LABEL_MAP_PATH}.")
-        
-    if not os.path.exists(CONFIG_PATH):
-        raise FileNotFoundError(f"Config not found at {CONFIG_PATH}.")
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
-    with open(LABEL_MAP_PATH, "r") as f:
-        class_to_idx = json.load(f)
-    idx_to_class = {v: k for k, v in class_to_idx.items()}
-    num_classes = len(idx_to_class)
-    
-    with open(CONFIG_PATH, "r") as f:
-        cfg = yaml.safe_load(f)
-    
-    ckpt = torch.load(CHECKPOINT_PATH, map_location=device, weights_only=False)
-    
-    model = build_from_config(cfg, num_classes=num_classes)
-    model.load_state_dict(ckpt["model_state"])
-    model.to(device)
-    model.eval()
-    
-    return model, idx_to_class, device, cfg
+def get_model_and_labels():
+    device = resolve_device("auto")
+    model, idx_to_class, cfg = load_inference_model(
+        CHECKPOINT_PATH, LABEL_MAP_PATH, CONFIG_PATH, device
+    )
+    return model, idx_to_class, cfg, device
 
 # Setup UI
 st.title("🌿 Plant Disease Classifier")
@@ -62,10 +35,25 @@ st.write("Predictions are based on 15 PlantVillage crop-disease classes.")
 st.caption("Disclaimer: This is an academic image-classification demonstration, not agricultural or professional diagnostic advice. Images from PlantVillage may not represent field conditions.")
 
 try:
-    model, idx_to_class, device, cfg = load_model_and_labels()
+    model, idx_to_class, cfg, device = get_model_and_labels()
 except Exception as e:
     st.error(str(e))
     st.stop()
+
+# Optional Automated Sample Test Section
+summary_path = Path("reports/frontend_test/summary.json")
+if summary_path.exists():
+    with st.expander("Automated Sample Test", expanded=False):
+        import json
+        with open(summary_path, "r") as f:
+            summary = json.load(f)
+        st.write("### Automated frontend sample-test results")
+        st.write("*These values are not the official full test-set metrics.*")
+        st.write(f"- **Tested samples:** {summary['total_successfully_processed']}")
+        st.write(f"- **Sample Top-1 accuracy:** {summary['sample_top1_accuracy'] * 100:.2f}%")
+        st.write(f"- **Sample Top-3 accuracy:** {summary['sample_top3_accuracy'] * 100:.2f}%")
+        st.write(f"- **Mean inference time:** {summary['mean_inference_time_ms']:.2f} ms")
+        st.write(f"- **Device used:** {summary['device']}")
 
 st.sidebar.title("Model Information")
 st.sidebar.write(f"**Model Name:** ViT-B/16")
@@ -91,26 +79,15 @@ if uploaded_file is not None:
     with col2:
         st.subheader("Prediction Result")
         
-        transforms = build_eval_transforms(img_size=224, resize_shorter=256)
-        input_tensor = transforms(image).unsqueeze(0).to(device)
-        
-        with torch.no_grad():
-            outputs = model(input_tensor)
-            probs = F.softmax(outputs, dim=1).squeeze(0)
-            
-        top_probs, top_indices = torch.topk(probs, 3)
-        top_probs = top_probs.cpu().numpy()
-        top_indices = top_indices.cpu().numpy()
-        
-        predicted_class = idx_to_class[top_indices[0]].replace("_", " ")
-        confidence = top_probs[0] * 100
+        predicted_class, confidence, top_classes, top_probs = predict_image(
+            model, idx_to_class, image, device
+        )
         
         st.write(f"**Predicted Class:** {predicted_class}")
-        st.write(f"**Model Confidence Score:** {confidence:.2f}%")
+        st.write(f"**Model Confidence Score:** {confidence * 100:.2f}%")
         
         st.write("### Top-3 Predictions")
         for i in range(3):
-            cls_name = idx_to_class[top_indices[i]].replace("_", " ")
-            score = top_probs[i] * 100
-            st.write(f"{i+1}. {cls_name}: {score:.2f}%")
+            st.write(f"{i+1}. {top_classes[i]}: {top_probs[i] * 100:.2f}%")
             st.progress(float(top_probs[i]))
+

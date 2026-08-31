@@ -113,6 +113,17 @@ The project includes an optional Streamlit frontend for interactive inference de
 
 For more details, refer to [docs/FRONTEND.md](docs/FRONTEND.md).
 
+### Automated Frontend Test
+
+You can automatically run the frontend pipeline on a small subset of test images:
+```bash
+.\.venv\Scripts\python.exe scripts\test_inference.py --samples-per-class 3 --split test --seed 42 --device auto --output-dir reports/frontend_test
+```
+- It runs 3 deterministic test images per class (up to 45 images).
+- It does not retrain the model.
+- Generated reports remain local under `reports/frontend_test`.
+- Sample-test results do not replace official full test-set metrics.
+
 ---
 
 ## 📁 Repository Structure

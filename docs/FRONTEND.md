@@ -50,3 +50,39 @@ streamlit run app.py
 - **Missing Checkpoint:** Ensure the `.pt` file is located exactly at the expected relative path.
 - **Dependency Issues:** Ensure you have activated the correct virtual environment before installing `streamlit` or running `app.py`. Do not globally install dependencies if it overrides your CUDA PyTorch installation.
 - **Invalid Images:** Corrupted or unsupported image files will be caught by the frontend and present a clear error message instead of crashing the server.
+
+## Automated Inference Testing
+
+### Purpose
+The automated inference test validates the frontend prediction pipeline in batch mode. It simulates processing a small number of deterministic samples to ensure that the identical inference code path processes them correctly, catching pipeline errors and visual misclassifications without needing manual UI interaction.
+
+### Default Sample Strategy
+- **Split**: Uses the `test` split to avoid overlapping with training data.
+- **Quantity**: Runs 3 samples per class, capping at 45 images.
+- **Determinism**: A fixed seed (`--seed 42`) guarantees the exact same subset of images is chosen across runs.
+
+### Commands
+Run the default batch test:
+```bash
+.\.venv\Scripts\python.exe scripts\test_inference.py --samples-per-class 3 --split test --seed 42 --device auto --output-dir reports/frontend_test
+```
+
+Run specific images manually:
+```bash
+.\.venv\Scripts\python.exe scripts\test_inference.py --specific-images "data/raw/PlantVillage/Tomato_healthy/image1.JPG"
+```
+
+### Outputs
+Outputs are saved in `reports/frontend_test/` (excluded from Git tracking):
+- `summary.json`: High-level test summary and timing.
+- `predictions.csv`: Image-by-image tabular prediction log.
+- `class_summary.csv`: Accuracy broken down by class.
+- `prediction_gallery*.png`: Visual layout of the selected images overlaid with their predicted class and ground truth.
+- `confidence_summary.png`: A histogram plotting the model's confidence distribution for correct vs. incorrect classifications.
+
+### Disclaimer
+**Important**: The sample-test results from this script test only the functional operation of the Streamlit application pipeline on ~45 images. They **do not** replace the official full test-set metrics (~3,000 images) located in the main `reports/` directory.
+
+### Behavior Notes
+- **CUDA Behavior**: Setting `--device cuda` explicitly will fail if CUDA is not available. The default `--device auto` seamlessly falls back to CPU if necessary.
+- **Misclassification**: A misclassification by the model does not fail the script. Misclassification is a valid functional outcome of the test.
