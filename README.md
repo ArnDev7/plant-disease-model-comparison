@@ -52,8 +52,8 @@ All quantitative metrics are computed on the held-out **3,096-image test set** u
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **MLP** | 77.42% | 77.36% | 71.27% | 72.07% | 94.54% |
 | **Custom CNN** | 76.94% | 78.84% | 71.76% | 70.81% | 91.63% |
-| **ResNet-18** | **88.53%** | **88.64%** | **86.97%** | **87.06%** | **98.29%** |
-| **ViT-B/16** | 99.77% | 99.79% | 99.80% | 99.79% | 100.00% |
+| **ResNet-18** | 88.53% | 88.64% | 86.97% | 87.06% | 98.29% |
+| **ViT-B/16** | **99.77%** | **99.79%** | **99.80%** | **99.79%** | **100.00%** |
 
 ### Additional Reference Benchmark
 
@@ -69,7 +69,7 @@ All quantitative metrics are computed on the held-out **3,096-image test set** u
 
 Based strictly on empirical evaluation outputs in [`reports/comparison/factual_observations.md`](reports/comparison/factual_observations.md):
 
-* **Top Performer**: **ResNet-18** achieved the highest overall performance with a **88.53% Test Accuracy**, **87.06% Macro-F1**, and **98.29% Top-3 Accuracy**.
+* **Top Performer**: **ViT-B/16** achieved the highest overall performance with a **99.77% Test Accuracy**, **99.79% Macro-F1**, and **100.00% Top-3 Accuracy**.
 * **Pretrained vs. From-Scratch Gap**: ResNet-18 exceeded the from-scratch Custom CNN by **+11.60 percentage points** in accuracy and **+16.25 percentage points** in Macro-F1. This result is consistent with the hypothesis that pretrained visual features provide stronger inductive priors for agricultural imagery, although this experiment does not isolate pretraining as the sole causal factor.
 * **Parameter Efficiency**: The lightweight Custom CNN (392K parameters) achieved competitive accuracy (76.94%) relative to the massive unregularized MLP (77.2M parameters, 77.42%), demonstrating the effectiveness of convolutional inductive bias (translation equivariance) over parameter scale alone.
 * **Top-3 Coverage**: All evaluated models attained greater than **91.6% Top-3 Accuracy**, confirming that the correct disease class ranks among the top three predictions in the vast majority of test instances.
@@ -99,7 +99,12 @@ Based strictly on empirical evaluation outputs in [`reports/comparison/factual_o
 
 ## 🖥️ Interactive Demo
 
-The project includes an optional Streamlit frontend for interactive inference demonstrations. This is separate from academic training.
+The project includes an optional Streamlit frontend for interactive inference demonstrations. This is separate from academic training. The Streamlit application allows a user to upload a PlantVillage-style leaf image and view:
+- Predicted class
+- Model confidence score
+- Top-3 predictions
+- Confidence visualization
+- Model and device information
 
 1. Ensure your best ViT-B/16 checkpoint is located at: `reports/vit_b16/checkpoints/vit_b16_best.pt`
 2. Start the application:
@@ -109,7 +114,6 @@ The project includes an optional Streamlit frontend for interactive inference de
    *(Alternatively: `streamlit run app.py`)*
 3. Open the local URL displayed in the terminal.
 4. Upload a PNG, JPG, or JPEG leaf image.
-5. View the predicted class and Top-3 confidence scores.
 
 For more details, refer to [docs/FRONTEND.md](docs/FRONTEND.md).
 
