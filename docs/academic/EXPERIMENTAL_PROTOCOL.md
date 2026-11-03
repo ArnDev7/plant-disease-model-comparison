@@ -1,0 +1,23 @@
+# Experimental Protocol
+
+- **Common split and class mapping**: Deterministic 70/15/15 split mapping and fixed 15-class ordering.
+- **Input size**: 224x224 pixels.
+- **Normalization**: ImageNet standard mean and standard deviation.
+- **Loss function**: CrossEntropyLoss.
+- **Optimizers per model**: AdamW for all models.
+- **Learning rates per phase/model**:
+  - Scratch models (MLP, Custom CNN): `lr_head` 0.001, `lr_finetune` 0.001.
+  - Pretrained models (ResNet-18, EfficientNet-B0): `lr_head` 0.001, `lr_finetune` 0.0001.
+  - ViT-B/16: `lr_head` 0.001, `lr_finetune` 1e-05.
+- **Epoch settings**:
+  - Scratch models: 25 epochs.
+  - Pretrained models: 8 epochs (head) + 15 epochs (fine-tune).
+- **Early-stopping configuration**: Configured with patience 5, monitoring `macro_f1`.
+- **Scheduler configuration**: Cosine annealing scheduler (`CosineAnnealingLR`).
+- **Best-checkpoint criterion**: Highest validation `macro_f1`.
+- **Evaluation metrics**: Test loss, Test accuracy, Macro precision, Macro recall, Macro-F1, Top-3 accuracy.
+- **Confusion-matrix generation**: Generated per model, both normalized and unnormalized.
+- **Per-class evaluation**: Extracted and recorded in per-class CSV files.
+- **Result-directory isolation**: Outputs mapped to isolated model-specific subdirectories under `reports/` and `reports_archive/`.
+- **Hardware environments actually used**: Training performed across varying environments including macOS with MPS and Windows with CUDA (RTX 4050).
+- **Reproducibility limitations**: Hardware-specific nondeterminism (e.g. `atomicAdd` on GPU) can prevent bit-exact reproduction despite fixed seeds.
